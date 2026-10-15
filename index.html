@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1f6f8b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="UE打卡">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>UE 构建管线 · 40 周学习打卡</title>
+<style>
+:root{--bg:#eef1f4;--card:#fff;--ink:#1b2430;--mute:#6a7686;--line:#d9dfe6;--done:#1f6f8b;--donefg:#fff;--today:#d9822b;--p1:#2b7a5f;--p2:#4a63b8;--p3:#1f6f8b;--p4:#a8483c;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#11161d;--card:#1a212b;--ink:#e6ebf1;--mute:#93a0b0;--line:#2c3644;--done:#4fb0cf;--donefg:#0d1319;--today:#f0a050;--p1:#5cc09c;--p2:#8ea3ee;--p3:#4fb0cf;--p4:#ea8d80;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#11161d;--card:#1a212b;--ink:#e6ebf1;--mute:#93a0b0;--line:#2c3644;--done:#4fb0cf;--donefg:#0d1319;--today:#f0a050;--p1:#5cc09c;--p2:#8ea3ee;--p3:#4fb0cf;--p4:#ea8d80;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "PingFang SC","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif}
+main{max-width:640px;margin:0 auto;padding:16px 14px 48px}
+h1{font-size:20px;margin:4px 0 2px}
+.sub{color:var(--mute);font-size:13px;margin:0 0 14px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px}
+.stat b{display:block;font-size:26px;line-height:1.1}
+.stat span{color:var(--mute);font-size:12px}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin-bottom:18px}
+.bar i{display:block;height:100%;background:var(--done);width:0;transition:width .3s}
+.ph{margin:22px 0 8px;font-size:14px;font-weight:700}
+.ph small{font-weight:400;color:var(--mute);margin-left:6px}
+.wk{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--c);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.wk.cur{box-shadow:0 0 0 2px var(--today)}
+.wh{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--mute)}
+.wt{font-weight:700;font-size:15px;margin:2px 0 0}
+.wg{font-size:13px;color:var(--mute);margin:0 0 8px}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.d{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:8px;padding:5px 0;font:inherit;font-size:12px;line-height:1.3;text-align:center;cursor:pointer;min-height:44px}
+.d b{display:block;font-size:14px}
+.d.on{background:var(--done);border-color:var(--done);color:var(--donefg)}
+.d.td{border-color:var(--today);border-width:2px}
+.d.fu{opacity:.45;cursor:default}
+.d:focus-visible,.tb:focus-visible{outline:2px solid var(--today);outline-offset:2px}
+.tb{margin-top:18px;background:none;border:1px solid var(--line);color:var(--mute);border-radius:8px;padding:8px 12px;font:inherit;font-size:13px}
+.note{font-size:13px;color:var(--mute);margin-top:6px}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tab{flex:1;border:1px solid var(--line);background:var(--card);color:var(--mute);border-radius:8px;padding:9px;font:inherit;font-weight:700;cursor:pointer}
+.tab.on{background:var(--done);border-color:var(--done);color:var(--donefg)}
+.card{background:var(--card);border:2px solid var(--today);border-radius:12px;padding:12px;margin-bottom:14px}
+.lks{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.lks a,.res a{color:var(--done);text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:5px 9px;font-size:13px}
+.big{width:100%;min-height:48px;border:2px solid var(--done);background:transparent;color:var(--done);border-radius:10px;font:inherit;font-weight:700;font-size:15px;cursor:pointer;margin-bottom:10px}
+.big.on{background:var(--done);color:var(--donefg)}
+textarea{width:100%;min-height:84px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--ink);font:inherit;font-size:14px;padding:8px;resize:vertical}
+.res{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.res b{display:block;font-size:14px}.res span{font-size:12px;color:var(--mute)}
+.cat{font-weight:700;margin:18px 0 8px}
+</style>
+</head>
+<body>
+<main>
+<h1>UE 构建管线 · 40 周学习打卡</h1>
+<p class="sub">每天约 3 小时：1 小时学，2 小时练。周日以复盘和笔记为主。起点 2026-10-19。</p>
+<div class="stats">
+<div class="stat"><b id="s1">0</b><span>已打卡天数</span></div>
+<div class="stat"><b id="s2">0</b><span>连续天数</span></div>
+<div class="stat"><b id="s3">0%</b><span>总进度</span></div>
+</div>
+<div class="bar"><i id="bar"></i></div>
+<div class="tabs"><button class="tab on" data-v="c">打卡</button><button class="tab" data-v="l">资料库</button></div>
+<div id="cv"><div class="card" id="today"></div><div id="list"></div></div>
+<div id="lv" hidden></div>
+<p class="note">点击日期格子打卡，再点一次取消。只能给今天和过去的日子打卡。记录只保存在当前浏览器里。</p>
+<button class="tb" id="reset">清空全部记录</button>
+</main>
+<script>
+var START=new Date(2026,9,19);
+var PH=[["阶段一：编程与工程基础","第 1–8 周","--p1"],["阶段二：C++/C# 与 UE5 入门","第 9–20 周","--p2"],["阶段三：核心，Unreal 构建管线","第 21–32 周","--p3"],["阶段四：作品与求职","第 33–40 周","--p4"]];
+var W=[
+[0,"Python 基础（一）","变量、条件、循环、函数；每天写小练习"],
+[0,"Python 基础（二）","列表、字典、文件读写、异常；写 3 个小脚本"],
+[0,"用 Python 做构建类脚本","subprocess、pathlib、argparse；写一个自动清理加压缩脚本"],
+[0,"Git","分支、合并、冲突、rebase；通关 Learn Git Branching"],
+[0,"Linux 与命令行","常用命令、权限、环境变量、Shell 脚本"],
+[0,"CI/CD（一）GitHub Actions","提交代码后自动运行脚本和测试"],
+[0,"CI/CD（二）Jenkins","本地装 Jenkins，用 Jenkinsfile 建流水线"],
+[0,"Docker 与第一个小项目","把 Python 程序做成提交即构建、测试、打包，并上传 GitHub"],
+[1,"C++ 基础（一）","语法、指针与引用、类"],
+[1,"C++ 基础（二）","继承、模板入门、标准库容器"],
+[1,"C++ 基础（三）","读懂小型开源项目；复习一周"],
+[1,"C++ 巩固","写 2 个小程序，学会用 CMake 编译"],
+[1,"C# 基础（一）","语法、类、集合；UAT 就是 C# 写的"],
+[1,"C# 基础（二）","文件与进程操作，写一个命令行小工具"],
+[1,"UE5 入门（一）","安装 UE 5.4 或更高版本，熟悉编辑器和工程结构"],
+[1,"UE5 入门（二）","蓝图基础，做一个最小可玩的小关卡"],
+[1,"UE5 入门（三）","C++ 类与模块，认识 Build.cs、Target.cs、插件"],
+[1,"UE5 入门（四）","完成一个小项目，建立项目仓库"],
+[1,"UE 打包（一）","Win 平台打包，理解 Cook 与 Pak"],
+[1,"UE 打包（二）","多配置打包（Development/Shipping），整理笔记。可开始浏览跳板岗位"],
+[2,"UAT（一）","RunUAT BuildCookRun，弄懂常用参数"],
+[2,"UAT（二）","编译、Cook、打包全部命令行化，写成脚本"],
+[2,"UAT（三）","排查常见失败原因，建立错误笔记"],
+[2,"BuildGraph（一）","读官方文档，看懂 XML 结构"],
+[2,"BuildGraph（二）","自己写 Node、Agent、Trigger"],
+[2,"BuildGraph（三）","把编译、Cook、打包串成完整图"],
+[2,"BuildGraph（四）","加入参数化与多平台选项"],
+[2,"Jenkins 接入 UE（一）","Jenkins 触发 BuildGraph 构建"],
+[2,"Jenkins 接入 UE（二）","多分支流水线，每个分支自动构建"],
+[2,"多分支开发策略","Git 分支模型、合并流程；了解 Perforce 基本概念"],
+[2,"Horde 与 UGS","按官方文档部署体验，记录步骤"],
+[2,"构建加 AI","写小工具，自动分析构建日志并给出失败原因摘要"],
+[3,"作品项目（一）","确定项目方案：UE5 多分支、多平台自动构建流水线"],
+[3,"作品项目（二）","搭建流水线主体"],
+[3,"作品项目（三）","加入多分支、多平台与通知"],
+[3,"作品项目（四）","写 README、录演示、整理截图"],
+[3,"简历与作品包装","写简历，把项目放最前面，突出解决了什么问题"],
+[3,"面试准备","整理 Git、C++、构建流程常见问题和回答"],
+[3,"投递（一）","投跳板岗位：测试开发、构建发布、DevOps"],
+[3,"投递（二）与复盘","查看米哈游社招官网相关岗位，对照要求补短板"]
+];
+var L={
+py1:["Python","廖雪峰 Python 教程","https://liaoxuefeng.com/books/python/introduction/index.html","中文入门，循序渐进"],
+py2:["Python","Python 官方教程（中文）","https://docs.python.org/zh-cn/3/tutorial/index.html","权威，适合查漏补缺"],
+git1:["Git","Learn Git Branching","https://learngitbranching.js.org/?locale=zh_CN","互动通关，练分支与 rebase"],
+git2:["Git","Pro Git 中文版","https://git-scm.com/book/zh/v2","Git 官方书籍"],
+lx1:["Linux","计算机教育中的缺失一课","https://missing-semester-cn.github.io/","命令行、Shell、Git 等实用工具"],
+lx2:["Linux","鸟哥的 Linux 私房菜","https://linux.vbird.org/","Linux 基础系统教程"],
+ci1:["CI/CD","GitHub Actions 文档","https://docs.github.com/zh/actions","工作流入门，免费上手快"],
+ci2:["CI/CD","Jenkins 官方文档","https://www.jenkins.io/zh/doc/","流水线与 Jenkinsfile"],
+dk:["Docker","Docker 入门","https://docs.docker.com/get-started/","镜像、容器、Dockerfile"],
+cpp1:["C++/C#","LearnCpp","https://www.learncpp.com/","系统的 C++ 教程（英文）"],
+cpp2:["C++/C#","cppreference 中文","https://zh.cppreference.com/","C++ 标准库查询"],
+cs:["C++/C#","C# 官方文档","https://learn.microsoft.com/zh-cn/dotnet/csharp/","微软 C# 教程"],
+ue1:["Unreal","Epic 开发者社区学习库","https://dev.epicgames.com/community/learning","官方课程与教程"],
+ue2:["Unreal","Unreal Engine 官方文档","https://dev.epicgames.com/documentation/zh-cn/unreal-engine","工程结构、打包、Cook"],
+uat:["Unreal","Unreal Automation Tool","https://dev.epicgames.com/documentation/zh-cn/unreal-engine/unreal-automation-tool-for-unreal-engine","UAT，BuildCookRun"],
+bg:["Unreal","BuildGraph","https://dev.epicgames.com/documentation/zh-cn/unreal-engine/buildgraph-for-unreal-engine","用 XML 描述构建流程"],
+horde:["Unreal","Horde","https://dev.epicgames.com/documentation/en-us/unreal-engine/horde-for-unreal-engine","Epic 的构建与 CI 系统"],
+ugs:["Unreal","Unreal Game Sync","https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-game-sync-ugs-for-unreal-engine","配合 Perforce 的同步工具"],
+p4:["Unreal","Perforce 学习资源","https://www.perforce.com/resources","游戏行业常用版本控制"],
+job:["求职","米哈游招聘官网","https://jobs.mihoyo.com","社招页搜：构建、工具链、DevOps、Unreal"]};
+var CATS=["Python","Git","Linux","CI/CD","Docker","C++/C#","Unreal","求职"];
+var WR="py1,py2|py1,py2|py2|git1,git2|lx1,lx2|ci1|ci2|dk,ci1|cpp1,cpp2|cpp1,cpp2|cpp1,cpp2|cpp1,cpp2|cs|cs|ue1,ue2|ue1,ue2|ue2,cpp2|ue1,ue2|ue2|ue2,uat|uat|uat|uat|bg|bg|bg|bg|ci2,bg|ci2,bg|git2,p4|horde,ugs|py2,ci2|bg,ci2|bg,ci2|ci1,ci2|ci1,ci2|job|job|job|job".split("|").map(function(s){return s.split(",")});
+var KEY="ue-plan-checks",S={},N={},CW=-1,TI=0;
+try{N=JSON.parse(localStorage.getItem("ue-plan-notes")||"{}")}catch(e){N={}}
+function esc(t){return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function lk(ids){return ids.map(function(i){var x=L[i];return '<a href="'+x[2]+'" target="_blank" rel="noopener">'+x[1]+'</a>'}).join("")}
+function todayCard(){
+ var i=CW,pre=false;
+ if(i<0){if(today<START){i=0;pre=true}else{i=W.length-1}}
+ TI=i;var w=W[i],on=!!S[ds(today)];
+ document.getElementById("today").innerHTML='<div class="wh"><span>'+(pre?"计划 "+md(START)+" 开始，先预习第 1 周":"本周 · 第 "+(i+1)+" 周")+'</span></div><div class="wt">'+w[1]+'</div><p class="wg">'+w[2]+'</p><div class="lks">'+lk(WR[i])+'</div>'+(pre?"":'<button class="big'+(on?" on":"")+'" id="tk">'+(on?"今天已打卡，点此取消":"完成今天的学习，打卡")+'</button>')+'<textarea id="nt" placeholder="本周笔记：卡点、命令、心得（自动保存）">'+esc(N[i]||"")+'</textarea>';
+}
+function lib(){
+ var h='<p class="note">链接可能随官网改版失效，打不开时请用标题搜索。</p>';
+ CATS.forEach(function(c){h+='<div class="cat">'+c+'</div>';Object.keys(L).forEach(function(k){var x=L[k];if(x[0]===c)h+='<div class="res"><div><b>'+x[1]+'</b><span>'+x[3]+'</span></div><a href="'+x[2]+'" target="_blank" rel="noopener">打开</a></div>'})});
+ document.getElementById("lv").innerHTML=h;
+}
+try{S=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){S={}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function ds(d){return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2)}
+var now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+var names=["一","二","三","四","五","六","日"];
+function md(d){return (d.getMonth()+1)+"/"+d.getDate()}
+function build(){
+ var el=document.getElementById("list"),h="",last=-1,curW=-1;
+ W.forEach(function(w,i){
+  var s=new Date(START.getTime());s.setDate(s.getDate()+i*7);
+  var e=new Date(s.getTime());e.setDate(e.getDate()+6);
+  var isCur=today>=s&&today<=e;if(isCur)curW=i;
+  if(w[0]!==last){last=w[0];h+='<div class="ph" style="color:var('+PH[w[0]][2]+')">'+PH[w[0]][0]+'<small>'+PH[w[0]][1]+'</small></div>'}
+  h+='<div class="wk'+(isCur?" cur":"")+'" id="w'+i+'" style="--c:var('+PH[w[0]][2]+')"><div class="wh"><span>第 '+(i+1)+' 周</span><span>'+md(s)+' – '+md(e)+'</span></div><div class="wt">'+w[1]+'</div><p class="wg">'+w[2]+'</p><div class="days">';
+  for(var k=0;k<7;k++){
+   var d=new Date(s.getTime());d.setDate(d.getDate()+k);
+   var key=ds(d),fu=d>today;
+   h+='<button class="d'+(S[key]?" on":"")+(+d===+today?" td":"")+(fu?" fu":"")+'" data-k="'+key+'"'+(fu?" disabled":"")+' aria-pressed="'+(!!S[key])+'" aria-label="'+key+'"><span>'+names[k]+'</span><b>'+d.getDate()+'</b></button>';
+  }
+  h+='</div></div>';
+ });
+ el.innerHTML=h;
+ CW=curW;todayCard();
+ stats();
+}
+function stats(){
+ var n=Object.keys(S).filter(function(k){return S[k]}).length,tot=W.length*7;
+ var st=0,d=new Date(today.getTime());
+ if(!S[ds(d)])d.setDate(d.getDate()-1);
+ while(S[ds(d)]){st++;d.setDate(d.getDate()-1)}
+ document.getElementById("s1").textContent=n;
+ document.getElementById("s2").textContent=st;
+ var p=Math.round(n/tot*100);
+ document.getElementById("s3").textContent=p+"%";
+ document.getElementById("bar").style.width=p+"%";
+}
+document.getElementById("list").addEventListener("click",function(ev){
+ var b=ev.target.closest(".d");if(!b||b.disabled)return;
+ var k=b.getAttribute("data-k");
+ if(S[k]){delete S[k]}else{S[k]=1}
+ b.classList.toggle("on",!!S[k]);b.setAttribute("aria-pressed",!!S[k]);
+ save();stats();todayCard();
+});
+document.getElementById("reset").addEventListener("click",function(){
+ if(confirm("确定清空所有打卡记录吗？此操作不能撤销。")){S={};save();build()}
+});
+document.getElementById("today").addEventListener("click",function(ev){
+ if(ev.target.id!=="tk")return;
+ var k=ds(today);if(S[k]){delete S[k]}else{S[k]=1}
+ save();build();
+});
+document.getElementById("today").addEventListener("input",function(ev){
+ if(ev.target.id!=="nt")return;
+ N[TI]=ev.target.value;try{localStorage.setItem("ue-plan-notes",JSON.stringify(N))}catch(e){}
+});
+document.querySelector(".tabs").addEventListener("click",function(ev){
+ var b=ev.target.closest(".tab");if(!b)return;
+ var v=b.getAttribute("data-v");
+ document.querySelectorAll(".tab").forEach(function(t){t.classList.toggle("on",t===b)});
+ document.getElementById("cv").hidden=v!=="c";
+ document.getElementById("lv").hidden=v!=="l";
+});
+lib();build();
+if('serviceWorker' in navigator){try{navigator.serviceWorker.register('sw.js')}catch(e){}}
+</script>
+</body>
+</html>
